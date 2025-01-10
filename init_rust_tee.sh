@@ -77,7 +77,7 @@ ARCH ?= aarch64
 TARGET ?= aarch64-unknown-linux-gnu
 OBJCOPY := objcopy
 
-OUT_DIR := \$(CURDIR)/target/\$(TARGET)/release
+OUT_DIR := \$(CURDIR)/../../target/\$(TARGET)/release
 
 
 all: host strip
@@ -148,6 +148,7 @@ fn main() -> optee_teec::Result<()> {
 EOF
 
 # 在 host/Cargo.toml 中添加依赖项
+
 sed -i '/\[dependencies\]/a proto = { path = "../proto" } \noptee-teec = { git = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git", branch = "main", default-features = false }\n' ./Cargo.toml
 
 sed -i '$a [profile.release]\nlto = true\n' ./Cargo.toml
@@ -155,9 +156,6 @@ sed -i '$a [profile.release]\nlto = true\n' ./Cargo.toml
 # 修改 ta/Cargo.toml 中的版本和作者
 sed -i "s/^authors = .*/authors = [\"$authors\"]/" ./Cargo.toml
 sed -i "s/^name = .*/name = \"$PROJECT_NAME\" /" ./Cargo.toml
-# 目前2024版本会报错，使用optee-utee-build时
-sed -i 's/^edition = .*/edition = "2021"/' ./Cargo.toml
-
 
 cd ..
 
@@ -206,22 +204,14 @@ cat <<EOF > ./src/lib.rs
 // under the License.
 
 #![no_std]
+use num_enum::{TryFromPrimitive, IntoPrimitive};
 
+#[derive(TryFromPrimitive, IntoPrimitive, Debug, Copy, Clone)]
+#[repr(u32)]
 pub enum Command {
     IncValue,
     DecValue,
     Unknown,
-}
-
-impl From<u32> for Command {
-    #[inline]
-    fn from(value: u32) -> Command {
-        match value {
-            0 => Command::IncValue,
-            1 => Command::DecValue,
-            _ => Command::Unknown,
-        }
-    }
 }
 
 pub const UUID: &str = &include_str!(concat!(env!("OUT_DIR"), "/uuid.txt"));
@@ -229,10 +219,10 @@ EOF
 
 # 在Cargo.toml 中添加依赖项
 # sed -i '$a [build-dependencies]\n' ./Cargo.toml
+sed -i '/\[dependencies\]/a num_enum = { version = "0.7", default-features = false }\n' ./Cargo.toml
 
 # 修改Cargo.toml 中的版本和作者
 sed -i "s/^authors = .*/authors = [\"$authors\"]/" ./Cargo.toml
-sed -i 's/^edition = .*/edition = "2021"/' ./Cargo.toml
 
 cd ..
 
@@ -265,7 +255,7 @@ OBJCOPY := objcopy
 
 TA_SIGN_KEY ?= \$(TA_DEV_KIT_DIR)/keys/default_ta.pem
 SIGN := \$(TA_DEV_KIT_DIR)/scripts/sign_encrypt.py
-OUT_DIR := \$(CURDIR)/target/\$(TARGET)/release
+OUT_DIR := \$(CURDIR)/../../target/\$(TARGET)/release
 
 all: ta strip sign
 
@@ -341,7 +331,13 @@ fn destroy() {
 fn invoke_command(cmd_id: u32, params: &mut Parameters) -> Result<()> {
     trace_println!("[+] TA invoke command");
     let mut values = unsafe { params.0.as_value().unwrap() };
-    match Command::from(cmd_id) {
+
+    let cmd = Command::try_from(cmd_id).map_err(|e| {
+        optee_utee::trace_println!("Unknown cmd {}, err is {}", cmd_id, e);
+        ErrorKind::BadParameters
+    })?;
+
+    match cmd {
         Command::IncValue => {
             values.set_a(values.a() + 100);
             Ok(())
@@ -381,7 +377,7 @@ use optee_utee_build::{Error, RustEdition, TaConfig};
 fn main() -> Result<(), Error> {
     let config = TaConfig::new_default_with_cargo_env(proto::UUID)?;
 
-    optee_utee_build::build(RustEdition::Before2024, config)
+    optee_utee_build::build(RustEdition::Edition2024, config)
 
 }
 EOF
@@ -440,7 +436,13 @@ fn destroy() {
 fn invoke_command(cmd_id: u32, params: &mut Parameters) -> Result<()> {
     trace_println!("[+] TA invoke command");
     let mut values = unsafe { params.0.as_value().unwrap() };
-    match Command::from(cmd_id) {
+
+    let cmd = Command::try_from(cmd_id).map_err(|e| {
+        optee_utee::trace_println!("Unknown cmd {}, err is {}", cmd_id, e);
+        ErrorKind::BadParameters
+    })?;
+
+    match cmd {
         Command::IncValue => {
             values.set_a(values.a() + 100);
             Ok(())
@@ -464,9 +466,6 @@ sed -i '$a [profile.release]\npanic = "abort"\nlto = true\nopt-level = 1\n' ./Ca
 
 # 修改Cargo.toml 中的版本和作者
 sed -i "s/^authors = .*/authors = [\"$authors\"]/" ./Cargo.toml
-
-# 目前2024版本会报错，使用optee-utee-build时
-sed -i 's/^edition = .*/edition = "2021"/' ./Cargo.toml
 
 cd ..
 

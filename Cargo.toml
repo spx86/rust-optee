@@ -1,1 +1,6 @@
 workspace = { members = ["p256/host", "p256/proto", "p256/ta"] }
+resolver = "3"
+
+
+[profile.release]
+panic = "abort"
