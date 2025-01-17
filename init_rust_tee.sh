@@ -418,6 +418,16 @@ use optee_utee::{
 use optee_utee::{Error, ErrorKind, Parameters, Result};
 use proto::Command;
 
+#[panic_handler]
+fn panic_handler(panic: &core::panic::PanicInfo<'_>) -> ! {
+    trace_println!("TEE PANIC!!!! PanicInfo: {:#?}", panic);
+    unsafe { 
+        optee_utee_sys::TEE_Panic(optee_utee_sys::TEE_ERROR_BAD_STATE) 
+    };
+    loop {}
+}
+
+
 #[ta_create]
 fn create() -> Result<()> {
     trace_println!("[+] TA create");
@@ -464,10 +474,33 @@ fn invoke_command(cmd_id: u32, params: &mut Parameters) -> Result<()> {
 }
 
 include!(concat!(env!("OUT_DIR"), "/user_ta_header.rs"));
+
+#[unsafe(no_mangle)]
+pub extern "C" fn rust_eh_personality() {
+    trace_println!("the rust_eh_personality function should never be called");
+    unsafe { 
+        optee_utee_sys::TEE_Panic(optee_utee_sys::TEE_ERROR_BAD_STATE) 
+    };
+    loop {}
+}
+
+
+#[unsafe(no_mangle)]
+pub extern "C" fn _Unwind_Resume() {
+    trace_println!("the _Unwind_Resume function should never be called");
+    unsafe { 
+        optee_utee_sys::TEE_Panic(optee_utee_sys::TEE_ERROR_BAD_STATE) 
+    };
+    loop {}
+}
+
+
+
+
 EOF
 
 # 在Cargo.toml 中添加依赖项
-sed -i '/\[dependencies\]/a proto = { path = "../proto" } \noptee-utee = { git = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git", branch = "main", default-features = false }\noptee-utee-sys = { git = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git", branch = "main", default-features = false }\n' ./Cargo.toml
+sed -i '/\[dependencies\]/a proto = { path = "../proto" } \noptee-utee = { git = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git", branch = "main",features = ["no_panic_handler"], default-features = false }\noptee-utee-sys = { git = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git", branch = "main", default-features = false }\n' ./Cargo.toml
 
 sed -i '$a [build-dependencies]\nproto = { path = "../proto" }\noptee-utee-build = "0.2.0"\n' ./Cargo.toml
 sed -i '$a [profile.release]\npanic = "abort"\nlto = true\nopt-level = 1\n' ./Cargo.toml
