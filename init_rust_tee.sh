@@ -14,6 +14,14 @@ BASE_DIR="$(pwd)/$PROJECT_NAME"
 # 创建项目根目录
 mkdir -p "$BASE_DIR"
 cd "$BASE_DIR" || exit 1
+cat <<EOF > Cargo.toml
+[workspace]
+
+resolver = "2"
+
+[profile.release]
+panic = "abort"
+EOF
 
 # 创建顶层 Makefile
 cat <<EOF > Makefile
@@ -77,7 +85,7 @@ ARCH ?= aarch64
 TARGET ?= aarch64-unknown-linux-gnu
 OBJCOPY := objcopy
 
-OUT_DIR := \$(CURDIR)/../../target/\$(TARGET)/release
+OUT_DIR := \$(CURDIR)/../target/\$(TARGET)/release
 
 
 all: host strip
@@ -255,7 +263,7 @@ OBJCOPY := objcopy
 
 TA_SIGN_KEY ?= \$(TA_DEV_KIT_DIR)/keys/default_ta.pem
 SIGN := \$(TA_DEV_KIT_DIR)/scripts/sign_encrypt.py
-OUT_DIR := \$(CURDIR)/../../target/\$(TARGET)/release
+OUT_DIR := \$(CURDIR)/../target/\$(TARGET)/release
 
 all: ta strip sign
 
