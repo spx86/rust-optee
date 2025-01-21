@@ -1,0 +1,15 @@
+[package]
+name = "p256" 
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+proto = { path = "../proto" } 
+optee-teec = { git = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git", branch = "main", default-features = false }
+hex = "0.4.2"
+base64 = "0.22.0"
+openssl = "0.10.67"
+chrono = "0.4.38"
+[profile.release]
+lto = true
+
