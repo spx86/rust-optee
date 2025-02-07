@@ -1,3 +1,0 @@
-cargo:rerun-if-env-changed=SYS_BUILD_TYPE
-cargo:rustc-link-search=/home/pengxu/tee_config/export/usr/lib
-cargo:rustc-link-lib=dylib=teec

@@ -102,6 +102,7 @@ mod tests {
         let key = read_pem_from_file(&mut file).unwrap();
         
         let data = vec![1u8; 16];
+<<<<<<< HEAD
         doMac(&mut session, data, key.to_vec()).unwrap();
     }
 
@@ -117,5 +118,19 @@ mod tests {
         let mac = vec![32, 23, 54, 209, 77, 55, 192, 125, 144, 202, 105, 40, 115, 197, 65, 244];
 
         verify(&mut session, data,key, mac).unwrap();
+=======
+        doMac(&mut session, data, key).unwrap();
+    }
+
+    #[test]
+    fn test_verify() {
+        let mut ctx = Context::new().unwrap();
+        let uuid = Uuid::parse_str(UUID).unwrap();
+        let mut session = ctx.open_session(uuid).unwrap();
+
+        let data = vec![0u8; 16];
+        let mac = vec![0u8; 16];
+        verify(&mut session, data, mac).unwrap();
+>>>>>>> 98046ba0b61f447b0d0f86e758c7f090bbeb6ef5
     }
 }

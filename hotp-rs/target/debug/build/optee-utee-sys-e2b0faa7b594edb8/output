@@ -1,5 +1,0 @@
-cargo:rerun-if-env-changed=SYS_BUILD_TYPE
-cargo:rustc-link-search=/home/pengxu/tee_config/export-ta_arm64/lib
-cargo:rustc-link-lib=static=utee
-cargo:rustc-link-lib=static=utils
-cargo:rustc-link-lib=static=mbedtls
