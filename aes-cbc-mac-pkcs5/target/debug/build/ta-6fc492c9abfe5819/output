@@ -1,0 +1,14 @@
+cargo:rerun-if-env-changed=RUSTC_LINKER
+cargo:rerun-if-env-changed=TA_DEV_KIT_DIR
+cargo:rerun-if-env-changed=TARGET_TA
+cargo:rustc-link-search=/home/pengxu/rust-optee/aes-cbc-mac-pcsk5/target/debug/build/ta-6fc492c9abfe5819/out
+cargo:rerun-if-changed=/home/pengxu/rust-optee/aes-cbc-mac-pcsk5/target/debug/build/ta-6fc492c9abfe5819/out/ta.lds
+cargo:rustc-link-arg=-T/home/pengxu/rust-optee/aes-cbc-mac-pcsk5/target/debug/build/ta-6fc492c9abfe5819/out/ta.lds
+cargo:rustc-link-search=/home/pengxu/tee_config/export-ta_arm64/lib
+cargo:rustc-link-lib=static=utee
+cargo:rustc-link-lib=static=utils
+cargo:rustc-link-arg=-e__ta_entry
+cargo:rustc-link-arg=-pie
+cargo:rustc-link-arg=-Os
+cargo:rustc-link-arg=-Wl,--sort-section=alignment
+cargo:rustc-link-arg=-Wl,--dynamic-list=dyn_list

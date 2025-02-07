@@ -1,0 +1,12 @@
+[package]
+name = "hotp-rs" 
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+proto = { path = "../proto" } 
+optee-teec = { git = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git", branch = "main", default-features = false }
+
+[profile.release]
+lto = true
+

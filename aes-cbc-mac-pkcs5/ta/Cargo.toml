@@ -1,0 +1,19 @@
+[package]
+name = "ta"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+proto = { path = "../proto" } 
+optee-utee = { git = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git", branch = "main",features = ["no_panic_handler"], default-features = false }
+optee-utee-sys = { git = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git", branch = "main", default-features = false }
+
+[build-dependencies]
+proto = { path = "../proto" }
+optee-utee-build = "0.2.0"
+
+[profile.release]
+panic = "abort"
+lto = true
+opt-level = 1
+

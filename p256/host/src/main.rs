@@ -128,7 +128,7 @@ mod tests {
         let uuid = Uuid::parse_str(UUID).unwrap();
         let mut session = ctx.open_session(uuid).unwrap();
 
-        let mut file = "/home/pengxu/rust-optee/p256/pk/public_key_20250121_113713.pem";
+        let mut file = "/home/pengxu/rust-optee/p256/pk/public_key_20250206_151947.pem";
         let pk = read_pem_from_file(&mut file).unwrap();
         let data = vec![0u8; 32];
         sign(&mut session, pk, data).unwrap();
@@ -140,10 +140,10 @@ mod tests {
         let uuid = Uuid::parse_str(UUID).unwrap();
         let mut session = ctx.open_session(uuid).unwrap();
 
-        let mut file = "/home/pengxu/rust-optee/p256/pk/public_key_20250121_113713.pem";
+        let mut file = "/home/pengxu/rust-optee/p256/pk/public_key_20250206_151947.pem";
         let pk = read_pem_from_file(&mut file).unwrap();
         let data = vec![0u8; 32];
-        let signature = format::read_sign_from_file("/home/pengxu/rust-optee/p256/sign/signature_20250121_154122.dat").unwrap();
+        let signature = format::read_sign_from_file("/home/pengxu/rust-optee/p256/sign/signature_20250206_152106.dat").unwrap();
         verify(&mut session, pk, data, signature).unwrap();
     }
 
